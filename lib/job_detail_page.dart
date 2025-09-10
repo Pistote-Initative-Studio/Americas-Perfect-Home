@@ -1,0 +1,201 @@
+import 'package:flutter/material.dart';
+import 'models.dart';
+import 'material_request_form.dart';
+
+class JobDetailPage extends StatefulWidget {
+  final Job job;
+  final bool isAdmin;
+  final String employeeName;
+
+  const JobDetailPage({
+    super.key,
+    required this.job,
+    this.isAdmin = true,
+    this.employeeName = 'Employee',
+  });
+
+  @override
+  State<JobDetailPage> createState() => _JobDetailPageState();
+}
+
+class _JobDetailPageState extends State<JobDetailPage>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 5, vsync: this);
+    _tabController.addListener(() => setState(() {}));
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  void _addOrEditMaterial({MaterialItem? material, int? index}) {
+    final nameController =
+        TextEditingController(text: material != null ? material.name : '');
+    final quantityController = TextEditingController(
+        text: material != null ? material.quantity.toString() : '');
+
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text(material == null ? 'Add Material' : 'Edit Material'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: nameController,
+              decoration: const InputDecoration(labelText: 'Name'),
+            ),
+            TextField(
+              controller: quantityController,
+              decoration: const InputDecoration(labelText: 'Quantity'),
+              keyboardType: TextInputType.number,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              final name = nameController.text.trim();
+              final quantity = int.tryParse(quantityController.text.trim()) ?? 0;
+              if (name.isNotEmpty && quantity > 0) {
+                setState(() {
+                  final item = MaterialItem(name: name, quantity: quantity);
+                  if (material == null) {
+                    widget.job.materials.add(item);
+                  } else if (index != null) {
+                    widget.job.materials[index] = item;
+                  }
+                });
+                Navigator.pop(context);
+              }
+            },
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _deleteMaterial(int index) {
+    setState(() {
+      widget.job.materials.removeAt(index);
+    });
+  }
+
+  void _requestMaterials() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => MaterialRequestForm(
+          job: widget.job,
+          employeeName: widget.employeeName,
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.job.name),
+        bottom: TabBar(
+          controller: _tabController,
+          tabs: const [
+            Tab(text: 'Overview'),
+            Tab(text: 'Materials'),
+            Tab(text: 'Employees'),
+            Tab(text: 'Time Logs'),
+            Tab(text: 'Invoices'),
+          ],
+        ),
+      ),
+      body: TabBarView(
+        controller: _tabController,
+        children: [
+          _overviewTab(),
+          _materialsTab(),
+          _listTab(widget.job.employees),
+          _listTab(widget.job.timeLogs),
+          _listTab(widget.job.invoices),
+        ],
+      ),
+      floatingActionButton: _tabController.index == 1
+          ? widget.isAdmin
+              ? FloatingActionButton(
+                  onPressed: () => _addOrEditMaterial(),
+                  child: const Icon(Icons.add),
+                )
+              : FloatingActionButton(
+                  onPressed: _requestMaterials,
+                  child: const Icon(Icons.add),
+                )
+          : null,
+    );
+  }
+
+  Widget _overviewTab() {
+    final job = widget.job;
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Client: ${job.client}'),
+          Text('Status: ${job.status}'),
+          Text('Current Cost: \$${job.currentCost.toStringAsFixed(2)}'),
+          Text('Projected Cost: \$${job.projectedCost.toStringAsFixed(2)}'),
+        ],
+      ),
+    );
+  }
+
+  Widget _materialsTab() {
+    return ListView.builder(
+      itemCount: widget.job.materials.length,
+      itemBuilder: (context, index) {
+        final material = widget.job.materials[index];
+        return ListTile(
+          title: Text(material.name),
+          subtitle: Text('Quantity: ${material.quantity}'),
+          trailing: widget.isAdmin
+              ? Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.edit),
+                      onPressed: () =>
+                          _addOrEditMaterial(material: material, index: index),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.delete),
+                      onPressed: () => _deleteMaterial(index),
+                    ),
+                  ],
+                )
+              : null,
+        );
+      },
+    );
+  }
+
+  Widget _listTab(List<String> items) {
+    return ListView.builder(
+      itemCount: items.length,
+      itemBuilder: (context, index) => ListTile(
+        title: Text(items[index]),
+      ),
+    );
+  }
+}
