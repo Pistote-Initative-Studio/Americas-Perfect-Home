@@ -2,12 +2,17 @@ import 'package:flutter/material.dart';
 import 'models.dart';
 import 'job_detail_page.dart';
 
-class JobsPage extends StatelessWidget {
+class JobsPage extends StatefulWidget {
   final bool isAdmin;
   final String employeeName;
 
   const JobsPage({super.key, this.isAdmin = true, this.employeeName = 'Employee'});
 
+  @override
+  State<JobsPage> createState() => _JobsPageState();
+}
+
+class _JobsPageState extends State<JobsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -32,11 +37,11 @@ class JobsPage extends StatelessWidget {
                   MaterialPageRoute(
                     builder: (_) => JobDetailPage(
                       job: job,
-                      isAdmin: isAdmin,
-                      employeeName: employeeName,
+                      isAdmin: widget.isAdmin,
+                      employeeName: widget.employeeName,
                     ),
                   ),
-                );
+                ).then((_) => setState(() {}));
               },
             ),
           );
