@@ -7,19 +7,45 @@ class MaterialItem {
   MaterialItem({required this.name, required this.quantity});
 }
 
+/// Represents an estimate template that can be used as a starting point
+/// when creating new estimates.
+class EstimateTemplate {
+  final int id;
+  String name;
+  List<MaterialItem> materials;
+  List<MaterialItem> labor;
+
+  EstimateTemplate({
+    required this.id,
+    required this.name,
+    this.materials = const [],
+    this.labor = const [],
+  });
+}
+
+/// Model representing an estimate in the system. Estimates can be linked to a
+/// job once approved. Until then they remain in draft form.
 class Estimate {
   final int id;
   String title;
+  String clientName;
   double amount;
-  String status;
+  String status; // Draft, Sent, Accepted, Rejected
   List<MaterialItem> materials;
+  List<MaterialItem> labor;
+  int? templateId;
+  int? jobId; // populated when converted or attached to a job
 
   Estimate({
     required this.id,
     required this.title,
+    required this.clientName,
     required this.amount,
-    this.status = 'Pending',
+    this.status = 'Draft',
     this.materials = const [],
+    this.labor = const [],
+    this.templateId,
+    this.jobId,
   });
 }
 
@@ -65,6 +91,51 @@ class MaterialRequest {
   });
 }
 
+/// Pre-populated templates and estimates used throughout the demo
+final List<EstimateTemplate> mockTemplates = [
+  EstimateTemplate(
+    id: 1,
+    name: 'Basic Kitchen',
+    materials: [MaterialItem(name: 'Wood', quantity: 10)],
+  ),
+];
+
+/// Global list of all estimates (drafts and those linked to jobs)
+final List<Estimate> mockEstimates = [
+  Estimate(
+    id: 101,
+    title: 'Original Estimate',
+    clientName: 'Smith Family',
+    amount: 12000,
+    status: 'Accepted',
+    materials: [MaterialItem(name: 'Wood', quantity: 20)],
+    jobId: 1,
+  ),
+  Estimate(
+    id: 201,
+    title: 'Initial Estimate',
+    clientName: 'Johnson Family',
+    amount: 8000,
+    status: 'Draft',
+    materials: [MaterialItem(name: 'Tiles', quantity: 100)],
+    jobId: 2,
+  ),
+  Estimate(
+    id: 301,
+    title: 'Cabinet Upgrade',
+    clientName: 'Williams',
+    amount: 2000,
+    materials: [MaterialItem(name: 'Cabinet', quantity: 5)],
+  ),
+  Estimate(
+    id: 302,
+    title: 'Lighting Addition',
+    clientName: 'Williams',
+    amount: 1500,
+    materials: [MaterialItem(name: 'LED Light', quantity: 20)],
+  ),
+];
+
 final List<Job> mockJobs = [
   Job(
     id: 1,
@@ -76,15 +147,7 @@ final List<Job> mockJobs = [
     materials: [MaterialItem(name: 'Wood', quantity: 20)],
     employees: ['Alice', 'Bob'],
     timeLogs: ['Logged 8 hours'],
-    estimates: [
-      Estimate(
-        id: 101,
-        title: 'Original Estimate',
-        amount: 12000,
-        status: 'Approved',
-        materials: [MaterialItem(name: 'Wood', quantity: 20)],
-      ),
-    ],
+    estimates: [mockEstimates[0]],
   ),
   Job(
     id: 2,
@@ -96,32 +159,9 @@ final List<Job> mockJobs = [
     materials: [MaterialItem(name: 'Tiles', quantity: 100)],
     employees: ['Charlie'],
     timeLogs: [],
-    estimates: [
-      Estimate(
-        id: 201,
-        title: 'Initial Estimate',
-        amount: 8000,
-        status: 'Pending',
-        materials: [MaterialItem(name: 'Tiles', quantity: 100)],
-      ),
-    ],
+    estimates: [mockEstimates[1]],
   ),
 ];
 
 final List<MaterialRequest> materialRequests = [];
-
-final List<Estimate> availableEstimates = [
-  Estimate(
-    id: 301,
-    title: 'Cabinet Upgrade',
-    amount: 2000,
-    materials: [MaterialItem(name: 'Cabinet', quantity: 5)],
-  ),
-  Estimate(
-    id: 302,
-    title: 'Lighting Addition',
-    amount: 1500,
-    materials: [MaterialItem(name: 'LED Light', quantity: 20)],
-  ),
-];
 

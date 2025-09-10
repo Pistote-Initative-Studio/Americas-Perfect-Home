@@ -207,12 +207,6 @@ class _JobDetailPageState extends State<JobDetailPage>
                     ? '\nAmount: \$${estimate.amount.toStringAsFixed(2)}'
                     : '')),
             isThreeLine: widget.isAdmin,
-            trailing: widget.isAdmin && estimate.status != 'Approved'
-                ? TextButton(
-                    onPressed: () => _approveEstimate(estimate),
-                    child: const Text('Approve'),
-                  )
-                : null,
           ),
         );
       },
@@ -231,62 +225,6 @@ class _JobDetailPageState extends State<JobDetailPage>
               child: const Icon(Icons.add),
             );
     }
-    if (_tabController.index == 4 && widget.isAdmin) {
-      return FloatingActionButton(
-        onPressed: _attachEstimate,
-        child: const Icon(Icons.attach_file),
-      );
-    }
     return null;
-  }
-
-  void _attachEstimate() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Attach Estimate'),
-          content: SizedBox(
-            width: double.maxFinite,
-            child: ListView.builder(
-              shrinkWrap: true,
-              itemCount: availableEstimates.length,
-              itemBuilder: (context, index) {
-                final estimate = availableEstimates[index];
-                return ListTile(
-                  title: Text(estimate.title),
-                  subtitle:
-                      Text('Amount: \$${estimate.amount.toStringAsFixed(2)}'),
-                  onTap: () {
-                    setState(() {
-                      widget.job.estimates.add(estimate);
-                      availableEstimates.removeAt(index);
-                    });
-                    Navigator.pop(context);
-                  },
-                );
-              },
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  void _approveEstimate(Estimate estimate) {
-    setState(() {
-      estimate.status = 'Approved';
-      for (final item in estimate.materials) {
-        final existingIndex = widget.job.materials
-            .indexWhere((m) => m.name == item.name);
-        if (existingIndex >= 0) {
-          widget.job.materials[existingIndex].quantity += item.quantity;
-        } else {
-          widget.job.materials
-              .add(MaterialItem(name: item.name, quantity: item.quantity));
-        }
-      }
-      widget.job.projectedCost += estimate.amount;
-    });
   }
 }
