@@ -23,7 +23,8 @@ class JobsPage extends StatelessWidget {
             margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             child: ListTile(
               title: Text(job.name),
-              subtitle: Text('${job.client}\nStatus: ${job.status}'),
+              subtitle: Text(
+                  '${job.client}\nStatus: ${job.status}\nEstimates: ${job.estimates.length}'),
               isThreeLine: true,
               onTap: () {
                 Navigator.push(

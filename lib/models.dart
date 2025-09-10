@@ -7,6 +7,22 @@ class MaterialItem {
   MaterialItem({required this.name, required this.quantity});
 }
 
+class Estimate {
+  final int id;
+  String title;
+  double amount;
+  String status;
+  List<MaterialItem> materials;
+
+  Estimate({
+    required this.id,
+    required this.title,
+    required this.amount,
+    this.status = 'Pending',
+    this.materials = const [],
+  });
+}
+
 class Job {
   final int id;
   String name;
@@ -17,7 +33,7 @@ class Job {
   List<MaterialItem> materials;
   List<String> employees;
   List<String> timeLogs;
-  List<String> invoices;
+  List<Estimate> estimates;
 
   Job({
     required this.id,
@@ -29,7 +45,7 @@ class Job {
     this.materials = const [],
     this.employees = const [],
     this.timeLogs = const [],
-    this.invoices = const [],
+    this.estimates = const [],
   });
 }
 
@@ -60,7 +76,15 @@ final List<Job> mockJobs = [
     materials: [MaterialItem(name: 'Wood', quantity: 20)],
     employees: ['Alice', 'Bob'],
     timeLogs: ['Logged 8 hours'],
-    invoices: ['Invoice #1'],
+    estimates: [
+      Estimate(
+        id: 101,
+        title: 'Original Estimate',
+        amount: 12000,
+        status: 'Approved',
+        materials: [MaterialItem(name: 'Wood', quantity: 20)],
+      ),
+    ],
   ),
   Job(
     id: 2,
@@ -72,9 +96,32 @@ final List<Job> mockJobs = [
     materials: [MaterialItem(name: 'Tiles', quantity: 100)],
     employees: ['Charlie'],
     timeLogs: [],
-    invoices: [],
+    estimates: [
+      Estimate(
+        id: 201,
+        title: 'Initial Estimate',
+        amount: 8000,
+        status: 'Pending',
+        materials: [MaterialItem(name: 'Tiles', quantity: 100)],
+      ),
+    ],
   ),
 ];
 
 final List<MaterialRequest> materialRequests = [];
+
+final List<Estimate> availableEstimates = [
+  Estimate(
+    id: 301,
+    title: 'Cabinet Upgrade',
+    amount: 2000,
+    materials: [MaterialItem(name: 'Cabinet', quantity: 5)],
+  ),
+  Estimate(
+    id: 302,
+    title: 'Lighting Addition',
+    amount: 1500,
+    materials: [MaterialItem(name: 'LED Light', quantity: 20)],
+  ),
+];
 
