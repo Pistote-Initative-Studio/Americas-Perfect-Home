@@ -1,11 +1,12 @@
-import 'package:flutter/material.dart';
+import 'models/material_item.dart';
+import 'models/estimate.dart';
+import 'models/labor_item.dart';
+import 'models/employee.dart';
 
-class MaterialItem {
-  String name;
-  int quantity;
-
-  MaterialItem({required this.name, required this.quantity});
-}
+export 'models/material_item.dart';
+export 'models/estimate.dart';
+export 'models/labor_item.dart';
+export 'models/employee.dart';
 
 /// Represents an estimate template that can be used as a starting point
 /// when creating new estimates.
@@ -13,39 +14,13 @@ class EstimateTemplate {
   final int id;
   String name;
   List<MaterialItem> materials;
-  List<MaterialItem> labor;
+  List<LaborItem> labor;
 
   EstimateTemplate({
     required this.id,
     required this.name,
     this.materials = const [],
     this.labor = const [],
-  });
-}
-
-/// Model representing an estimate in the system. Estimates can be linked to a
-/// job once approved. Until then they remain in draft form.
-class Estimate {
-  final int id;
-  String title;
-  String clientName;
-  double amount;
-  String status; // Draft, Sent, Accepted, Rejected
-  List<MaterialItem> materials;
-  List<MaterialItem> labor;
-  int? templateId;
-  int? jobId; // populated when converted or attached to a job
-
-  Estimate({
-    required this.id,
-    required this.title,
-    required this.clientName,
-    required this.amount,
-    this.status = 'Draft',
-    this.materials = const [],
-    this.labor = const [],
-    this.templateId,
-    this.jobId,
   });
 }
 
@@ -106,34 +81,34 @@ final List<Estimate> mockEstimates = [
     id: 101,
     title: 'Original Estimate',
     clientName: 'Smith Family',
-    amount: 12000,
     status: 'Accepted',
+    materialsCost: 12000,
     materials: [MaterialItem(name: 'Wood', quantity: 20)],
     jobId: 1,
-  ),
+  )..updateTotal(),
   Estimate(
     id: 201,
     title: 'Initial Estimate',
     clientName: 'Johnson Family',
-    amount: 8000,
     status: 'Draft',
+    materialsCost: 8000,
     materials: [MaterialItem(name: 'Tiles', quantity: 100)],
     jobId: 2,
-  ),
+  )..updateTotal(),
   Estimate(
     id: 301,
     title: 'Cabinet Upgrade',
     clientName: 'Williams',
-    amount: 2000,
+    materialsCost: 2000,
     materials: [MaterialItem(name: 'Cabinet', quantity: 5)],
-  ),
+  )..updateTotal(),
   Estimate(
     id: 302,
     title: 'Lighting Addition',
     clientName: 'Williams',
-    amount: 1500,
+    materialsCost: 1500,
     materials: [MaterialItem(name: 'LED Light', quantity: 20)],
-  ),
+  )..updateTotal(),
 ];
 
 final List<Job> mockJobs = [
@@ -164,4 +139,3 @@ final List<Job> mockJobs = [
 ];
 
 final List<MaterialRequest> materialRequests = [];
-
