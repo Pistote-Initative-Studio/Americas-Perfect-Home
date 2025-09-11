@@ -25,10 +25,9 @@ class Estimate {
     this.materialsCost = 0,
   }) : amount = materialsCost;
 
-  double get laborCost =>
-      labor.fold(0.0, (total, item) => total + item.cost);
+  double get laborCost => 0;
 
   void updateTotal() {
-    amount = materialsCost + laborCost;
+    amount = materialsCost;
   }
 }

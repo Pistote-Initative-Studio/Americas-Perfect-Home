@@ -14,7 +14,7 @@ class _EstimateDetailPageState extends State<EstimateDetailPage> {
   late TextEditingController clientController;
   late TextEditingController amountController;
   late List<MaterialItem> materials;
-  late List<MaterialItem> labor;
+  late List<LaborItem> labor;
 
   @override
   void initState() {
@@ -27,7 +27,7 @@ class _EstimateDetailPageState extends State<EstimateDetailPage> {
         .map((e) => MaterialItem(name: e.name, quantity: e.quantity))
         .toList();
     labor = widget.estimate.labor
-        .map((e) => MaterialItem(name: e.name, quantity: e.quantity))
+        .map((e) => LaborItem(role: e.role, hours: e.hours, employeeId: e.employeeId))
         .toList();
   }
 
@@ -39,13 +39,13 @@ class _EstimateDetailPageState extends State<EstimateDetailPage> {
     super.dispose();
   }
 
-  void _addItem(List<MaterialItem> list) {
+  void _addMaterialItem(List<MaterialItem> list) {
     final nameController = TextEditingController();
     final qtyController = TextEditingController();
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('Add Item'),
+        title: const Text('Add Material'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -72,6 +72,50 @@ class _EstimateDetailPageState extends State<EstimateDetailPage> {
               if (name.isNotEmpty && qty > 0) {
                 setState(() {
                   list.add(MaterialItem(name: name, quantity: qty));
+                });
+                Navigator.pop(context);
+              }
+            },
+            child: const Text('Add'),
+          )
+        ],
+      ),
+    );
+  }
+
+  void _addLaborItem(List<LaborItem> list) {
+    final roleController = TextEditingController();
+    final hoursController = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Add Labor'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: roleController,
+              decoration: const InputDecoration(labelText: 'Role'),
+            ),
+            TextField(
+              controller: hoursController,
+              decoration: const InputDecoration(labelText: 'Hours'),
+              keyboardType: TextInputType.number,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              final role = roleController.text.trim();
+              final hours = double.tryParse(hoursController.text.trim()) ?? 0;
+              if (role.isNotEmpty && hours > 0) {
+                setState(() {
+                  list.add(LaborItem(role: role, hours: hours));
                 });
                 Navigator.pop(context);
               }
@@ -206,7 +250,7 @@ class _EstimateDetailPageState extends State<EstimateDetailPage> {
                     ),
                   )),
           TextButton(
-            onPressed: () => _addItem(materials),
+            onPressed: () => _addMaterialItem(materials),
             child: const Text('Add Material'),
           ),
           const SizedBox(height: 16),
@@ -215,7 +259,7 @@ class _EstimateDetailPageState extends State<EstimateDetailPage> {
               .asMap()
               .entries
               .map((e) => ListTile(
-                    title: Text('${e.value.name} x${e.value.quantity}'),
+                    title: Text('${e.value.role} — ${e.value.hours}h'),
                     trailing: IconButton(
                       icon: const Icon(Icons.delete),
                       onPressed: () {
@@ -226,7 +270,7 @@ class _EstimateDetailPageState extends State<EstimateDetailPage> {
                     ),
                   )),
           TextButton(
-            onPressed: () => _addItem(labor),
+            onPressed: () => _addLaborItem(labor),
             child: const Text('Add Labor'),
           ),
           const SizedBox(height: 24),
