@@ -147,34 +147,40 @@ class _JobDetailPageState extends State<JobDetailPage>
           if (job.materials.isNotEmpty) ...[
             const Text('Materials',
                 style: TextStyle(fontWeight: FontWeight.bold)),
-            DataTable(
-              columns: const [
-                DataColumn(label: Text('Material')),
-                DataColumn(label: Text('Estimated')),
-                DataColumn(label: Text('Actual')),
-              ],
-              rows: job.materials
+            const SizedBox(height: 8),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: job.materials
                   .map(
-                    (m) => DataRow(
-                      cells: [
-                        DataCell(Text(m.name)),
-                        DataCell(Text(m.estimatedQuantity.toString())),
-                        DataCell(
-                          SizedBox(
-                            width: 80,
-                            child: TextFormField(
-                              initialValue: m.actualQuantity.toString(),
-                              keyboardType: TextInputType.number,
-                              onChanged: (val) {
-                                setState(() {
-                                  m.actualQuantity =
-                                      double.tryParse(val) ?? 0;
-                                });
-                              },
-                            ),
+                    (m) => Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(m.name,
+                              style: const TextStyle(fontWeight: FontWeight.bold)),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text('Estimated: ${m.estimatedQuantity}'),
+                              SizedBox(
+                                width: 60,
+                                child: TextField(
+                                  controller: TextEditingController(
+                                      text: m.actualQuantity.toString()),
+                                  keyboardType: TextInputType.number,
+                                  onChanged: (val) {
+                                    setState(() {
+                                      m.actualQuantity =
+                                          double.tryParse(val) ?? 0;
+                                    });
+                                  },
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   )
                   .toList(),
@@ -184,34 +190,40 @@ class _JobDetailPageState extends State<JobDetailPage>
           if (job.employees.isNotEmpty) ...[
             const Text('Employees',
                 style: TextStyle(fontWeight: FontWeight.bold)),
-            DataTable(
-              columns: const [
-                DataColumn(label: Text('Role/Employee')),
-                DataColumn(label: Text('Estimated Hours')),
-                DataColumn(label: Text('Actual Hours')),
-              ],
-              rows: job.employees
+            const SizedBox(height: 8),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: job.employees
                   .map(
-                    (e) => DataRow(
-                      cells: [
-                        DataCell(Text(e.role)),
-                        DataCell(Text(e.estimatedHours.toString())),
-                        DataCell(
-                          SizedBox(
-                            width: 80,
-                            child: TextFormField(
-                              initialValue: e.actualHours.toString(),
-                              keyboardType: TextInputType.number,
-                              onChanged: (val) {
-                                setState(() {
-                                  e.actualHours =
-                                      double.tryParse(val) ?? 0;
-                                });
-                              },
-                            ),
+                    (e) => Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(e.role,
+                              style: const TextStyle(fontWeight: FontWeight.bold)),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text('Estimated Hours: ${e.estimatedHours}'),
+                              SizedBox(
+                                width: 60,
+                                child: TextField(
+                                  controller: TextEditingController(
+                                      text: e.actualHours.toString()),
+                                  keyboardType: TextInputType.number,
+                                  onChanged: (val) {
+                                    setState(() {
+                                      e.actualHours =
+                                          double.tryParse(val) ?? 0;
+                                    });
+                                  },
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   )
                   .toList(),
