@@ -67,7 +67,7 @@ class _TemplatesPageState extends State<TemplatesPage> {
             ElevatedButton(
                 onPressed: () {
                   final role = r.text.trim();
-                  final hours = double.tryParse(h.text.trim()) ?? 0;
+                  final hours = double.tryParse(h.text.trim()) ?? 0.0;
                   if (role.isNotEmpty && hours > 0) {
                     setState(() {
                       list.add(LaborItem(role: role, hours: hours));

@@ -90,7 +90,7 @@ class _AdminViewState extends State<AdminView> {
                 final parts = str.split(':');
                 final name = parts[0];
                 final qty =
-                    parts.length > 1 ? double.tryParse(parts[1]) ?? 0 : 0;
+                    parts.length > 1 ? double.tryParse(parts[1]) ?? 0.0 : 0.0;
                 return MaterialItem(name: name, estimatedQuantity: qty);
               }).toList();
               setState(() {
@@ -132,11 +132,11 @@ class _AdminViewState extends State<AdminView> {
       final labor = job.employees.firstWhere(
           (l) => l.role == employee.name,
           orElse: () => job.employees.first);
-      labor.actualHours += 1;
+      labor.actualHours += 1.0;
       job.currentCost +=
           employee.hourlyRate +
               task.requiredMaterials
-                  .fold(0, (s, m) => s + m.estimatedQuantity * 10);
+                  .fold(0.0, (s, m) => s + m.estimatedQuantity * 10);
     });
     print(
         'Customer notified: Task ${task.title} completed with before/after photos.');

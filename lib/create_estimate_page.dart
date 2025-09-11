@@ -155,7 +155,7 @@ class _CreateEstimatePageState extends State<CreateEstimatePage> {
             ElevatedButton(
               onPressed: () {
                 final role = roleController.text.trim();
-                final hours = double.tryParse(hoursController.text.trim()) ?? 0;
+                final hours = double.tryParse(hoursController.text.trim()) ?? 0.0;
                 if (role.isNotEmpty && hours > 0) {
                   setState(() {
                     labor.add(LaborItem(
@@ -181,7 +181,7 @@ class _CreateEstimatePageState extends State<CreateEstimatePage> {
       id: id,
       title: titleController.text,
       clientName: clientController.text,
-      materialsCost: double.tryParse(materialCostController.text) ?? 0,
+      materialsCost: double.tryParse(materialCostController.text) ?? 0.0,
       materials: List.from(materials),
       labor: List.from(labor),
       status: send ? 'Sent' : 'Draft',
