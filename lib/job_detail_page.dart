@@ -25,7 +25,7 @@ class _JobDetailPageState extends State<JobDetailPage>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 4, vsync: this);
     _tabController.addListener(() => setState(() {}));
   }
 
@@ -115,6 +115,7 @@ class _JobDetailPageState extends State<JobDetailPage>
           controller: _tabController,
           tabs: const [
             Tab(text: 'Overview'),
+            Tab(text: 'Tasks'),
             Tab(text: 'Time Logs'),
             Tab(text: 'Invoices/Payments'),
           ],
@@ -124,6 +125,7 @@ class _JobDetailPageState extends State<JobDetailPage>
         controller: _tabController,
         children: [
           _overviewTab(),
+          _tasksTab(),
           _listTab(widget.job.timeLogs),
           _estimatesTab(),
         ],
@@ -234,6 +236,305 @@ class _JobDetailPageState extends State<JobDetailPage>
     );
   }
 
+  Widget _tasksTab() {
+    final job = widget.job;
+    if (widget.isAdmin) {
+      final Map<String, List<Task>> grouped = {};
+      for (final task in job.tasks) {
+        grouped.putIfAbsent(task.status, () => []).add(task);
+      }
+      return ListView(
+        padding: const EdgeInsets.all(8),
+        children: grouped.entries.map((entry) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: Text(entry.key,
+                    style: const TextStyle(fontWeight: FontWeight.bold)),
+              ),
+              ...entry.value.map((task) => Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(task.title,
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.bold)),
+                          Text('Assigned: ${_employeeName(task.assignedEmployeeId)}'),
+                          Text('Tools: ${task.tools.join(', ')}'),
+                          Text('Materials: ${task.requiredMaterials.map((m) => m.name).join(', ')}'),
+                          if (task.beforePhotos.isNotEmpty)
+                            Text('Before Photos: ${task.beforePhotos.length}'),
+                          if (task.afterPhotos.isNotEmpty)
+                            Text('After Photos: ${task.afterPhotos.length}'),
+                          if (task.status == 'Awaiting Approval')
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                TextButton(
+                                    onPressed: () => _approveTask(task),
+                                    child: const Text('Approve')),
+                                TextButton(
+                                    onPressed: () => _rejectTask(task),
+                                    child: const Text('Reject')),
+                              ],
+                            ),
+                        ],
+                      ),
+                    ),
+                  )),
+            ],
+          );
+        }).toList(),
+      );
+    } else {
+      final currentId = mockEmployees
+          .firstWhere((e) => e.name == widget.employeeName,
+              orElse: () => mockEmployees.first)
+          .id
+          .toString();
+      final tasks =
+          job.tasks.where((t) => t.assignedEmployeeId == currentId).toList();
+      if (tasks.isEmpty) {
+        return const Center(child: Text('No tasks assigned'));
+      }
+      return ListView(
+        padding: const EdgeInsets.all(8),
+        children: tasks.map((task) {
+          return Card(
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(task.title,
+                      style:
+                          const TextStyle(fontWeight: FontWeight.bold)),
+                  Text('Status: ${task.status}'),
+                  if (task.adminFeedback != null)
+                    Text('Feedback: ${task.adminFeedback}'),
+                  Row(
+                    children: [
+                      TextButton(
+                          onPressed: () {
+                            setState(() {
+                              task.beforePhotos.add(
+                                  'before_${task.beforePhotos.length + 1}.png');
+                              if (task.status == 'Pending') {
+                                task.status = 'In Progress';
+                              }
+                            });
+                          },
+                          child: const Text('Add Before Photo')),
+                      TextButton(
+                          onPressed: () {
+                            setState(() {
+                              task.afterPhotos.add(
+                                  'after_${task.afterPhotos.length + 1}.png');
+                            });
+                          },
+                          child: const Text('Add After Photo')),
+                    ],
+                  ),
+                  if (task.status != 'Awaiting Approval' &&
+                      task.status != 'Completed')
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          if (task.beforePhotos.isEmpty ||
+                              task.afterPhotos.isEmpty) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                    content: Text(
+                                        'Please add before and after photos')));
+                            return;
+                          }
+                          setState(() {
+                            task.status = 'Awaiting Approval';
+                          });
+                          print(
+                              'Admin notified: Task ${task.title} awaiting approval');
+                        },
+                        child: const Text('Request Complete'),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          );
+        }).toList(),
+      );
+    }
+  }
+
+  String _employeeName(String? id) {
+    if (id == null) return 'Unassigned';
+    return mockEmployees
+        .firstWhere((e) => e.id.toString() == id,
+            orElse: () => mockEmployees.first)
+        .name;
+  }
+
+  void _approveTask(Task task) {
+    setState(() {
+      task.status = 'Completed';
+      for (final material in task.requiredMaterials) {
+        final existing = widget.job.materials.firstWhere(
+          (m) => m.name == material.name,
+          orElse: () {
+            final item = MaterialItem(name: material.name, quantity: 0);
+            widget.job.materials.add(item);
+            return item;
+          },
+        );
+        existing.actualQuantity += material.estimatedQuantity;
+      }
+
+      final employee = mockEmployees.firstWhere(
+          (e) => e.id.toString() == task.assignedEmployeeId,
+          orElse: () => mockEmployees.first);
+      final labor = widget.job.employees.firstWhere(
+          (l) => l.role == employee.name,
+          orElse: () => widget.job.employees.first);
+      labor.actualHours += 1;
+      widget.job.currentCost +=
+          employee.hourlyRate +
+              task.requiredMaterials
+                  .fold(0, (s, m) => s + m.estimatedQuantity * 10);
+    });
+    print(
+        'Customer notified: Task ${task.title} completed with before/after photos.');
+  }
+
+  void _rejectTask(Task task) {
+    final feedbackController = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Reject Task'),
+        content: TextField(
+          controller: feedbackController,
+          decoration: const InputDecoration(labelText: 'Feedback'),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              setState(() {
+                task.status = 'In Progress';
+                task.adminFeedback = feedbackController.text;
+              });
+              Navigator.pop(context);
+            },
+            child: const Text('Reject'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _createTask() {
+    final titleController = TextEditingController();
+    final notesController = TextEditingController();
+    final toolsController = TextEditingController();
+    final materialsController = TextEditingController();
+    String? selectedEmployee;
+
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Create Task'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: titleController,
+                decoration: const InputDecoration(labelText: 'Title'),
+              ),
+              TextField(
+                controller: notesController,
+                decoration: const InputDecoration(labelText: 'Notes'),
+              ),
+              TextField(
+                controller: toolsController,
+                decoration:
+                    const InputDecoration(labelText: 'Tools (comma separated)'),
+              ),
+              TextField(
+                controller: materialsController,
+                decoration: const InputDecoration(
+                    labelText: 'Materials (name:qty, comma separated)'),
+              ),
+              StatefulBuilder(builder: (context, setStateSB) {
+                return DropdownButton<String>(
+                  value: selectedEmployee,
+                  hint: const Text('Assign Employee'),
+                  isExpanded: true,
+                  items: mockEmployees
+                      .map((e) => DropdownMenuItem(
+                            value: e.id.toString(),
+                            child: Text(e.name),
+                          ))
+                      .toList(),
+                  onChanged: (val) {
+                    setStateSB(() => selectedEmployee = val);
+                  },
+                );
+              }),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              final id = DateTime.now().millisecondsSinceEpoch.toString();
+              final tools = toolsController.text
+                  .split(',')
+                  .map((e) => e.trim())
+                  .where((e) => e.isNotEmpty)
+                  .toList();
+              final materials = materialsController.text
+                  .split(',')
+                  .map((e) => e.trim())
+                  .where((e) => e.isNotEmpty)
+                  .map((str) {
+                final parts = str.split(':');
+                final name = parts[0];
+                final qty =
+                    parts.length > 1 ? double.tryParse(parts[1]) ?? 0 : 0;
+                return MaterialItem(name: name, estimatedQuantity: qty);
+              }).toList();
+              setState(() {
+                widget.job.tasks.add(Task(
+                  id: id,
+                  title: titleController.text,
+                  notes: notesController.text,
+                  tools: tools,
+                  requiredMaterials: materials,
+                  assignedEmployeeId: selectedEmployee,
+                ));
+              });
+              Navigator.pop(context);
+            },
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _listTab(List<String> items) {
     return ListView.builder(
       itemCount: items.length,
@@ -278,6 +579,11 @@ class _JobDetailPageState extends State<JobDetailPage>
               onPressed: _requestMaterials,
               child: const Icon(Icons.add),
             );
+    } else if (_tabController.index == 1 && widget.isAdmin) {
+      return FloatingActionButton(
+        onPressed: _createTask,
+        child: const Icon(Icons.add_task),
+      );
     }
     return null;
   }
