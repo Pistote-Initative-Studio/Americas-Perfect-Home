@@ -25,7 +25,7 @@ class _JobDetailPageState extends State<JobDetailPage>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 5, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
     _tabController.addListener(() => setState(() {}));
   }
 
@@ -39,7 +39,9 @@ class _JobDetailPageState extends State<JobDetailPage>
     final nameController =
         TextEditingController(text: material != null ? material.name : '');
     final quantityController = TextEditingController(
-        text: material != null ? material.quantity.toString() : '');
+        text: material != null
+            ? material.estimatedQuantity.toString()
+            : '');
 
     showDialog(
       context: context,
@@ -67,10 +69,15 @@ class _JobDetailPageState extends State<JobDetailPage>
           ElevatedButton(
             onPressed: () {
               final name = nameController.text.trim();
-              final quantity = int.tryParse(quantityController.text.trim()) ?? 0;
+              final quantity =
+                  double.tryParse(quantityController.text.trim()) ?? 0;
               if (name.isNotEmpty && quantity > 0) {
                 setState(() {
-                  final item = MaterialItem(name: name, quantity: quantity);
+                  final item = MaterialItem(
+                    name: name,
+                    estimatedQuantity: quantity,
+                    actualQuantity: material?.actualQuantity ?? 0,
+                  );
                   if (material == null) {
                     widget.job.materials.add(item);
                   } else if (index != null) {
@@ -85,12 +92,6 @@ class _JobDetailPageState extends State<JobDetailPage>
         ],
       ),
     );
-  }
-
-  void _deleteMaterial(int index) {
-    setState(() {
-      widget.job.materials.removeAt(index);
-    });
   }
 
   void _requestMaterials() {
@@ -114,8 +115,6 @@ class _JobDetailPageState extends State<JobDetailPage>
           controller: _tabController,
           tabs: const [
             Tab(text: 'Overview'),
-            Tab(text: 'Materials'),
-            Tab(text: 'Employees'),
             Tab(text: 'Time Logs'),
             Tab(text: 'Invoices/Payments'),
           ],
@@ -125,8 +124,6 @@ class _JobDetailPageState extends State<JobDetailPage>
         controller: _tabController,
         children: [
           _overviewTab(),
-          _materialsTab(),
-          _listTab(widget.job.employees),
           _listTab(widget.job.timeLogs),
           _estimatesTab(),
         ],
@@ -137,7 +134,7 @@ class _JobDetailPageState extends State<JobDetailPage>
 
   Widget _overviewTab() {
     final job = widget.job;
-    return Padding(
+    return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -146,37 +143,82 @@ class _JobDetailPageState extends State<JobDetailPage>
           Text('Status: ${job.status}'),
           Text('Current Cost: \$${job.currentCost.toStringAsFixed(2)}'),
           Text('Projected Cost: \$${job.projectedCost.toStringAsFixed(2)}'),
+          const SizedBox(height: 16),
+          if (job.materials.isNotEmpty) ...[
+            const Text('Materials',
+                style: TextStyle(fontWeight: FontWeight.bold)),
+            DataTable(
+              columns: const [
+                DataColumn(label: Text('Material')),
+                DataColumn(label: Text('Estimated')),
+                DataColumn(label: Text('Actual')),
+              ],
+              rows: job.materials
+                  .map(
+                    (m) => DataRow(
+                      cells: [
+                        DataCell(Text(m.name)),
+                        DataCell(Text(m.estimatedQuantity.toString())),
+                        DataCell(
+                          SizedBox(
+                            width: 80,
+                            child: TextFormField(
+                              initialValue: m.actualQuantity.toString(),
+                              keyboardType: TextInputType.number,
+                              onChanged: (val) {
+                                setState(() {
+                                  m.actualQuantity =
+                                      double.tryParse(val) ?? 0;
+                                });
+                              },
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                  .toList(),
+            ),
+            const SizedBox(height: 16),
+          ],
+          if (job.employees.isNotEmpty) ...[
+            const Text('Employees',
+                style: TextStyle(fontWeight: FontWeight.bold)),
+            DataTable(
+              columns: const [
+                DataColumn(label: Text('Role/Employee')),
+                DataColumn(label: Text('Estimated Hours')),
+                DataColumn(label: Text('Actual Hours')),
+              ],
+              rows: job.employees
+                  .map(
+                    (e) => DataRow(
+                      cells: [
+                        DataCell(Text(e.role)),
+                        DataCell(Text(e.estimatedHours.toString())),
+                        DataCell(
+                          SizedBox(
+                            width: 80,
+                            child: TextFormField(
+                              initialValue: e.actualHours.toString(),
+                              keyboardType: TextInputType.number,
+                              onChanged: (val) {
+                                setState(() {
+                                  e.actualHours =
+                                      double.tryParse(val) ?? 0;
+                                });
+                              },
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                  .toList(),
+            ),
+          ],
         ],
       ),
-    );
-  }
-
-  Widget _materialsTab() {
-    return ListView.builder(
-      itemCount: widget.job.materials.length,
-      itemBuilder: (context, index) {
-        final material = widget.job.materials[index];
-        return ListTile(
-          title: Text(material.name),
-          subtitle: Text('Quantity: ${material.quantity}'),
-          trailing: widget.isAdmin
-              ? Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.edit),
-                      onPressed: () =>
-                          _addOrEditMaterial(material: material, index: index),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.delete),
-                      onPressed: () => _deleteMaterial(index),
-                    ),
-                  ],
-                )
-              : null,
-        );
-      },
     );
   }
 
@@ -214,7 +256,7 @@ class _JobDetailPageState extends State<JobDetailPage>
   }
 
   FloatingActionButton? _buildFab() {
-    if (_tabController.index == 1) {
+    if (_tabController.index == 0) {
       return widget.isAdmin
           ? FloatingActionButton(
               onPressed: () => _addOrEditMaterial(),

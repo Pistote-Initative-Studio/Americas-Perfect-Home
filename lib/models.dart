@@ -32,7 +32,7 @@ class Job {
   double projectedCost;
   String status;
   List<MaterialItem> materials;
-  List<String> employees;
+  List<LaborItem> employees;
   List<String> timeLogs;
   List<Estimate> estimates;
 
@@ -120,7 +120,10 @@ final List<Job> mockJobs = [
     projectedCost: 12000,
     status: 'In Progress',
     materials: [MaterialItem(name: 'Wood', quantity: 20)],
-    employees: ['Alice', 'Bob'],
+    employees: [
+      LaborItem(role: 'Alice', estimatedHours: 40),
+      LaborItem(role: 'Bob', estimatedHours: 35),
+    ],
     timeLogs: ['Logged 8 hours'],
     estimates: [mockEstimates[0]],
   ),
@@ -132,7 +135,7 @@ final List<Job> mockJobs = [
     projectedCost: 8000,
     status: 'Not Started',
     materials: [MaterialItem(name: 'Tiles', quantity: 100)],
-    employees: ['Charlie'],
+    employees: [LaborItem(role: 'Charlie', estimatedHours: 20)],
     timeLogs: [],
     estimates: [mockEstimates[1]],
   ),
