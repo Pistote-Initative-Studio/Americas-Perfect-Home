@@ -2,11 +2,13 @@ import 'models/material_item.dart';
 import 'models/estimate.dart';
 import 'models/labor_item.dart';
 import 'models/employee.dart';
+import 'models/task.dart';
 
 export 'models/material_item.dart';
 export 'models/estimate.dart';
 export 'models/labor_item.dart';
 export 'models/employee.dart';
+export 'models/task.dart';
 
 /// Represents an estimate template that can be used as a starting point
 /// when creating new estimates.
@@ -35,6 +37,7 @@ class Job {
   List<LaborItem> employees;
   List<String> timeLogs;
   List<Estimate> estimates;
+  List<Task> tasks;
 
   Job({
     required this.id,
@@ -47,6 +50,7 @@ class Job {
     this.employees = const [],
     this.timeLogs = const [],
     this.estimates = const [],
+    this.tasks = const [],
   });
 }
 
@@ -126,6 +130,17 @@ final List<Job> mockJobs = [
     ],
     timeLogs: ['Logged 8 hours'],
     estimates: [mockEstimates[0]],
+    tasks: [
+      Task(
+        id: '1',
+        title: 'Remove old cabinets',
+        notes: 'Take out existing cabinets before installing new ones.',
+        tools: ['Hammer'],
+        requiredMaterials: [MaterialItem(name: 'Trash Bags', quantity: 5)],
+        assignedEmployeeId: '1',
+        status: 'In Progress',
+      ),
+    ],
   ),
   Job(
     id: 2,
@@ -138,6 +153,7 @@ final List<Job> mockJobs = [
     employees: [LaborItem(role: 'Charlie', estimatedHours: 20)],
     timeLogs: [],
     estimates: [mockEstimates[1]],
+    tasks: [],
   ),
 ];
 
