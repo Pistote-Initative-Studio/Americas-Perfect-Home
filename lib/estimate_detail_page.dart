@@ -112,7 +112,7 @@ class _EstimateDetailPageState extends State<EstimateDetailPage> {
           ElevatedButton(
             onPressed: () {
               final role = roleController.text.trim();
-              final hours = double.tryParse(hoursController.text.trim()) ?? 0;
+              final hours = double.tryParse(hoursController.text.trim()) ?? 0.0;
               if (role.isNotEmpty && hours > 0) {
                 setState(() {
                   list.add(LaborItem(role: role, hours: hours));

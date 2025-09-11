@@ -70,7 +70,7 @@ class _JobDetailPageState extends State<JobDetailPage>
             onPressed: () {
               final name = nameController.text.trim();
               final quantity =
-                  double.tryParse(quantityController.text.trim()) ?? 0;
+                  double.tryParse(quantityController.text.trim()) ?? 0.0;
               if (name.isNotEmpty && quantity > 0) {
                 setState(() {
                   final item = MaterialItem(
@@ -174,7 +174,7 @@ class _JobDetailPageState extends State<JobDetailPage>
                                   onChanged: (val) {
                                     setState(() {
                                       m.actualQuantity =
-                                          double.tryParse(val) ?? 0;
+                                          double.tryParse(val) ?? 0.0;
                                     });
                                   },
                                 ),
@@ -217,7 +217,7 @@ class _JobDetailPageState extends State<JobDetailPage>
                                   onChanged: (val) {
                                     setState(() {
                                       e.actualHours =
-                                          double.tryParse(val) ?? 0;
+                                          double.tryParse(val) ?? 0.0;
                                     });
                                   },
                                 ),
@@ -400,11 +400,11 @@ class _JobDetailPageState extends State<JobDetailPage>
       final labor = widget.job.employees.firstWhere(
           (l) => l.role == employee.name,
           orElse: () => widget.job.employees.first);
-      labor.actualHours += 1;
+      labor.actualHours += 1.0;
       widget.job.currentCost +=
           employee.hourlyRate +
               task.requiredMaterials
-                  .fold(0, (s, m) => s + m.estimatedQuantity * 10);
+                  .fold(0.0, (s, m) => s + m.estimatedQuantity * 10);
     });
     print(
         'Customer notified: Task ${task.title} completed with before/after photos.');
@@ -513,7 +513,7 @@ class _JobDetailPageState extends State<JobDetailPage>
                 final parts = str.split(':');
                 final name = parts[0];
                 final qty =
-                    parts.length > 1 ? double.tryParse(parts[1]) ?? 0 : 0;
+                    parts.length > 1 ? double.tryParse(parts[1]) ?? 0.0 : 0.0;
                 return MaterialItem(name: name, estimatedQuantity: qty);
               }).toList();
               setState(() {
