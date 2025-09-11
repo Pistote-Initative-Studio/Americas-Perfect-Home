@@ -16,6 +16,15 @@ class _CreateEstimatePageState extends State<CreateEstimatePage> {
   List<MaterialItem> materials = [];
   List<LaborItem> labor = [];
 
+  String _employeeName(String? id) {
+    if (id == null) return 'Employee TBD';
+    try {
+      return mockEmployees.firstWhere((e) => e.id.toString() == id).name;
+    } catch (_) {
+      return 'Employee TBD';
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -96,7 +105,7 @@ class _CreateEstimatePageState extends State<CreateEstimatePage> {
   void _addLabor() {
     final roleController = TextEditingController();
     final hoursController = TextEditingController();
-    int? selectedEmployeeId;
+    String? selectedEmployeeId;
     showDialog(
       context: context,
       builder: (_) => StatefulBuilder(
@@ -114,7 +123,7 @@ class _CreateEstimatePageState extends State<CreateEstimatePage> {
                 decoration: const InputDecoration(labelText: 'Hours'),
                 keyboardType: TextInputType.number,
               ),
-              DropdownButton<int?>(
+              DropdownButton<String?>(
                 value: selectedEmployeeId,
                 hint: const Text('Assign Employee (optional)'),
                 isExpanded: true,
@@ -125,7 +134,7 @@ class _CreateEstimatePageState extends State<CreateEstimatePage> {
                   ),
                   ...mockEmployees.map(
                     (e) => DropdownMenuItem(
-                      value: e.id,
+                      value: e.id.toString(),
                       child: Text(e.name),
                     ),
                   )
@@ -163,8 +172,6 @@ class _CreateEstimatePageState extends State<CreateEstimatePage> {
     );
   }
 
-  double get laborTotal =>
-      labor.fold(0.0, (sum, item) => sum + item.cost);
 
   void _save({required bool send}) {
     final id = mockEstimates.isEmpty
@@ -186,11 +193,6 @@ class _CreateEstimatePageState extends State<CreateEstimatePage> {
 
   @override
   Widget build(BuildContext context) {
-    final laborSubtotal = laborTotal;
-    final materialsSubtotal =
-        double.tryParse(materialCostController.text) ?? 0;
-    final estimateTotal = materialsSubtotal + laborSubtotal;
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Create Estimate'),
@@ -255,11 +257,7 @@ class _CreateEstimatePageState extends State<CreateEstimatePage> {
           ...labor.asMap().entries.map(
                 (e) => ListTile(
                   title: Text(
-                    e.value.employeeId != null
-                        ? '${e.value.role} (${e.value.employeeName}) — '
-                            '${e.value.hours}h @ ${String.fromCharCode(36)}${e.value.rate.toStringAsFixed(2)}/hr = ${String.fromCharCode(36)}${e.value.cost.toStringAsFixed(2)}'
-                        : '${e.value.role} — ${e.value.hours}h (Employee TBD)',
-                  ),
+                      '${e.value.role} (${_employeeName(e.value.employeeId)}) — ${e.value.hours}h'),
                   trailing: IconButton(
                     icon: const Icon(Icons.delete),
                     onPressed: () {
@@ -274,10 +272,6 @@ class _CreateEstimatePageState extends State<CreateEstimatePage> {
             onPressed: _addLabor,
             child: const Text('Add Labor'),
           ),
-          const SizedBox(height: 8),
-          Text('Total Labor Cost: ${String.fromCharCode(36)}${laborSubtotal.toStringAsFixed(2)}'),
-          const SizedBox(height: 8),
-          Text('Estimate Total: ${String.fromCharCode(36)}${estimateTotal.toStringAsFixed(2)}'),
           const SizedBox(height: 24),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,

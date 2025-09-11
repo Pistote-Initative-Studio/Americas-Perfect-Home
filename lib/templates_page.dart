@@ -13,15 +13,15 @@ class _TemplatesPageState extends State<TemplatesPage> {
     final nameController = TextEditingController(text: template?.name ?? '');
     List<MaterialItem> materials =
         template != null ? List.from(template.materials) : [];
-    List<MaterialItem> labor = template != null ? List.from(template.labor) : [];
+    List<LaborItem> labor = template != null ? List.from(template.labor) : [];
 
-    void addItem(List<MaterialItem> list) {
+    void addMaterialItem(List<MaterialItem> list) {
       final n = TextEditingController();
       final q = TextEditingController();
       showDialog(
         context: context,
         builder: (_) => AlertDialog(
-          title: const Text('Add Item'),
+          title: const Text('Add Material'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -38,6 +38,39 @@ class _TemplatesPageState extends State<TemplatesPage> {
                   if (name.isNotEmpty && qty > 0) {
                     setState(() {
                       list.add(MaterialItem(name: name, quantity: qty));
+                    });
+                    Navigator.pop(context);
+                  }
+                },
+                child: const Text('Add'))
+          ],
+        ),
+      );
+    }
+
+    void addLaborItem(List<LaborItem> list) {
+      final r = TextEditingController();
+      final h = TextEditingController();
+      showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: const Text('Add Labor'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(controller: r, decoration: const InputDecoration(labelText: 'Role')),
+              TextField(controller: h, decoration: const InputDecoration(labelText: 'Hours'), keyboardType: TextInputType.number),
+            ],
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+            ElevatedButton(
+                onPressed: () {
+                  final role = r.text.trim();
+                  final hours = double.tryParse(h.text.trim()) ?? 0;
+                  if (role.isNotEmpty && hours > 0) {
+                    setState(() {
+                      list.add(LaborItem(role: role, hours: hours));
                     });
                     Navigator.pop(context);
                   }
@@ -76,13 +109,13 @@ class _TemplatesPageState extends State<TemplatesPage> {
                       ),
                     ),
                 TextButton(
-                    onPressed: () => addItem(materials),
+                    onPressed: () => addMaterialItem(materials),
                     child: const Text('Add Material')),
                 const SizedBox(height: 8),
                 const Text('Labor', style: TextStyle(fontWeight: FontWeight.bold)),
                 ...labor.asMap().entries.map(
                       (e) => ListTile(
-                        title: Text('${e.value.name} x${e.value.quantity}'),
+                        title: Text('${e.value.role} — ${e.value.hours}h'),
                         trailing: IconButton(
                           icon: const Icon(Icons.delete),
                           onPressed: () {
@@ -92,7 +125,7 @@ class _TemplatesPageState extends State<TemplatesPage> {
                       ),
                     ),
                 TextButton(
-                    onPressed: () => addItem(labor),
+                    onPressed: () => addLaborItem(labor),
                     child: const Text('Add Labor')),
               ],
             ),
