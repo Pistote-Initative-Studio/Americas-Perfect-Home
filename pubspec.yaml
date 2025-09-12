@@ -18,16 +18,16 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
-    - assets/logo.webp
+    - assets/logo.png
 
 flutter_native_splash:
   color: "#FFFFFF"
-  image: assets/logo.webp
+  image: assets/logo.png
   android: true
   ios: true
 
 flutter_icons:
   android: true
   ios: true
-  image_path: assets/logo.webp
+  image_path: assets/logo.png
   remove_alpha_ios: true
