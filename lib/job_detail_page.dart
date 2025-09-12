@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'models.dart';
-import 'material_request_form.dart';
 
 class JobDetailPage extends StatefulWidget {
   final Job job;
@@ -33,77 +32,6 @@ class _JobDetailPageState extends State<JobDetailPage>
   void dispose() {
     _tabController.dispose();
     super.dispose();
-  }
-
-  void _addOrEditMaterial({MaterialItem? material, int? index}) {
-    final nameController =
-        TextEditingController(text: material != null ? material.name : '');
-    final quantityController = TextEditingController(
-        text: material != null
-            ? material.estimatedQuantity.toString()
-            : '');
-
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: Text(material == null ? 'Add Material' : 'Edit Material'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: nameController,
-              decoration: const InputDecoration(labelText: 'Name'),
-            ),
-            TextField(
-              controller: quantityController,
-              decoration: const InputDecoration(labelText: 'Quantity'),
-              keyboardType: TextInputType.number,
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              final name = nameController.text.trim();
-              final quantity =
-                  double.tryParse(quantityController.text.trim()) ?? 0.0;
-              if (name.isNotEmpty && quantity > 0) {
-                setState(() {
-                  final item = MaterialItem(
-                    name: name,
-                    estimatedQuantity: quantity,
-                    actualQuantity: material?.actualQuantity ?? 0,
-                  );
-                  if (material == null) {
-                    widget.job.materials.add(item);
-                  } else if (index != null) {
-                    widget.job.materials[index] = item;
-                  }
-                });
-                Navigator.pop(context);
-              }
-            },
-            child: const Text('Save'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _requestMaterials() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => MaterialRequestForm(
-          job: widget.job,
-          employeeName: widget.employeeName,
-        ),
-      ),
-    );
   }
 
   @override
@@ -146,10 +74,22 @@ class _JobDetailPageState extends State<JobDetailPage>
           Text('Current Cost: \$${job.currentCost.toStringAsFixed(2)}'),
           Text('Projected Cost: \$${job.projectedCost.toStringAsFixed(2)}'),
           const SizedBox(height: 16),
-          if (job.materials.isNotEmpty) ...[
-            const Text('Materials',
-                style: TextStyle(fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('Materials',
+                  style: Theme.of(context).textTheme.subtitle1),
+              if (widget.isAdmin)
+                IconButton(
+                  icon: const Icon(Icons.edit),
+                  onPressed: () {
+                    _showEditMaterialsDialog(context);
+                  },
+                ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          if (job.materials.isNotEmpty)
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: job.materials
@@ -187,12 +127,23 @@ class _JobDetailPageState extends State<JobDetailPage>
                   )
                   .toList(),
             ),
-            const SizedBox(height: 16),
-          ],
-          if (job.employees.isNotEmpty) ...[
-            const Text('Employees',
-                style: TextStyle(fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
+          const SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('Employees',
+                  style: Theme.of(context).textTheme.subtitle1),
+              if (widget.isAdmin)
+                IconButton(
+                  icon: const Icon(Icons.edit),
+                  onPressed: () {
+                    _showEditEmployeesDialog(context);
+                  },
+                ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          if (job.employees.isNotEmpty)
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: job.employees
@@ -230,9 +181,303 @@ class _JobDetailPageState extends State<JobDetailPage>
                   )
                   .toList(),
             ),
-          ],
         ],
       ),
+    );
+  }
+
+  void _showEditMaterialsDialog(BuildContext context) {
+    final tempMaterials = widget.job.materials
+        .map((m) => MaterialItem(
+              name: m.name,
+              estimatedQuantity: m.estimatedQuantity,
+              actualQuantity: m.actualQuantity,
+            ))
+        .toList();
+    final nameController = TextEditingController();
+    final quantityController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setStateDialog) {
+            return AlertDialog(
+              title: const Text('Edit Materials'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: nameController,
+                    decoration: const InputDecoration(labelText: 'Name'),
+                  ),
+                  TextField(
+                    controller: quantityController,
+                    decoration: const InputDecoration(labelText: 'Quantity'),
+                    keyboardType: TextInputType.number,
+                  ),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: () {
+                        final name = nameController.text.trim();
+                        final qty =
+                            double.tryParse(quantityController.text.trim()) ??
+                                0;
+                        if (name.isNotEmpty && qty > 0) {
+                          setStateDialog(() {
+                            tempMaterials
+                                .add(MaterialItem(name: name, estimatedQuantity: qty));
+                            nameController.clear();
+                            quantityController.clear();
+                          });
+                        }
+                      },
+                      child: const Text('Add'),
+                    ),
+                  ),
+                  SizedBox(
+                    height: 200,
+                    width: double.maxFinite,
+                    child: ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: tempMaterials.length,
+                      itemBuilder: (context, index) {
+                        final item = tempMaterials[index];
+                        final itemName =
+                            TextEditingController(text: item.name);
+                        final itemQty = TextEditingController(
+                            text: item.estimatedQuantity.toString());
+                        return Row(
+                          children: [
+                            Expanded(
+                              child: TextField(
+                                controller: itemName,
+                                decoration:
+                                    const InputDecoration(labelText: 'Name'),
+                                onChanged: (val) {
+                                  tempMaterials[index] = MaterialItem(
+                                    name: val,
+                                    estimatedQuantity: item.estimatedQuantity,
+                                    actualQuantity: item.actualQuantity,
+                                  );
+                                },
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            SizedBox(
+                              width: 60,
+                              child: TextField(
+                                controller: itemQty,
+                                decoration:
+                                    const InputDecoration(labelText: 'Qty'),
+                                keyboardType: TextInputType.number,
+                                onChanged: (val) {
+                                  final q = double.tryParse(val) ?? 0;
+                                  tempMaterials[index] = MaterialItem(
+                                    name: tempMaterials[index].name,
+                                    estimatedQuantity: q,
+                                    actualQuantity:
+                                        tempMaterials[index].actualQuantity,
+                                  );
+                                },
+                              ),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.delete),
+                              onPressed: () {
+                                setStateDialog(() {
+                                  tempMaterials.removeAt(index);
+                                });
+                              },
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Cancel'),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      widget.job.materials = tempMaterials;
+                    });
+                    Navigator.pop(context);
+                  },
+                  child: const Text('Save'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _showEditEmployeesDialog(BuildContext context) {
+    final tempEmployees = widget.job.employees
+        .map((e) => LaborItem(
+              role: e.role,
+              estimatedHours: e.estimatedHours,
+              actualHours: e.actualHours,
+              employeeId: e.employeeId,
+            ))
+        .toList();
+    final nameController = TextEditingController();
+    final estController = TextEditingController();
+    final actController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setStateDialog) {
+            return AlertDialog(
+              title: const Text('Edit Employees'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: nameController,
+                    decoration: const InputDecoration(labelText: 'Name'),
+                  ),
+                  TextField(
+                    controller: estController,
+                    decoration:
+                        const InputDecoration(labelText: 'Estimated Hours'),
+                    keyboardType: TextInputType.number,
+                  ),
+                  TextField(
+                    controller: actController,
+                    decoration:
+                        const InputDecoration(labelText: 'Actual Hours'),
+                    keyboardType: TextInputType.number,
+                  ),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: () {
+                        final name = nameController.text.trim();
+                        final est =
+                            double.tryParse(estController.text.trim()) ?? 0;
+                        final act =
+                            double.tryParse(actController.text.trim()) ?? 0;
+                        if (name.isNotEmpty && est > 0) {
+                          setStateDialog(() {
+                            tempEmployees.add(
+                                LaborItem(role: name, estimatedHours: est, actualHours: act));
+                            nameController.clear();
+                            estController.clear();
+                            actController.clear();
+                          });
+                        }
+                      },
+                      child: const Text('Add'),
+                    ),
+                  ),
+                  SizedBox(
+                    height: 200,
+                    width: double.maxFinite,
+                    child: ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: tempEmployees.length,
+                      itemBuilder: (context, index) {
+                        final emp = tempEmployees[index];
+                        final roleCtrl = TextEditingController(text: emp.role);
+                        final estCtrl = TextEditingController(
+                            text: emp.estimatedHours.toString());
+                        final actCtrl =
+                            TextEditingController(text: emp.actualHours.toString());
+                        return Row(
+                          children: [
+                            Expanded(
+                              child: TextField(
+                                controller: roleCtrl,
+                                decoration:
+                                    const InputDecoration(labelText: 'Name'),
+                                onChanged: (val) {
+                                  tempEmployees[index] = LaborItem(
+                                    role: val,
+                                    estimatedHours: emp.estimatedHours,
+                                    actualHours: emp.actualHours,
+                                    employeeId: emp.employeeId,
+                                  );
+                                },
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            SizedBox(
+                              width: 60,
+                              child: TextField(
+                                controller: estCtrl,
+                                decoration:
+                                    const InputDecoration(labelText: 'Est'),
+                                keyboardType: TextInputType.number,
+                                onChanged: (val) {
+                                  final h = double.tryParse(val) ?? 0;
+                                  tempEmployees[index] = LaborItem(
+                                    role: tempEmployees[index].role,
+                                    estimatedHours: h,
+                                    actualHours: tempEmployees[index].actualHours,
+                                    employeeId: tempEmployees[index].employeeId,
+                                  );
+                                },
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            SizedBox(
+                              width: 60,
+                              child: TextField(
+                                controller: actCtrl,
+                                decoration:
+                                    const InputDecoration(labelText: 'Act'),
+                                keyboardType: TextInputType.number,
+                                onChanged: (val) {
+                                  emp.actualHours =
+                                      double.tryParse(val) ?? emp.actualHours;
+                                },
+                              ),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.delete),
+                              onPressed: () {
+                                setStateDialog(() {
+                                  tempEmployees.removeAt(index);
+                                });
+                              },
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Cancel'),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      widget.job.employees = tempEmployees;
+                    });
+                    Navigator.pop(context);
+                  },
+                  child: const Text('Save'),
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
   }
 
@@ -569,17 +814,7 @@ class _JobDetailPageState extends State<JobDetailPage>
   }
 
   FloatingActionButton? _buildFab() {
-    if (_tabController.index == 0) {
-      return widget.isAdmin
-          ? FloatingActionButton(
-              onPressed: () => _addOrEditMaterial(),
-              child: const Icon(Icons.add),
-            )
-          : FloatingActionButton(
-              onPressed: _requestMaterials,
-              child: const Icon(Icons.add),
-            );
-    } else if (_tabController.index == 1 && widget.isAdmin) {
+    if (_tabController.index == 1 && widget.isAdmin) {
       return FloatingActionButton(
         onPressed: _createTask,
         child: const Icon(Icons.add_task),
