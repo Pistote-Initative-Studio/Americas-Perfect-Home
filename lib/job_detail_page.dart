@@ -78,7 +78,7 @@ class _JobDetailPageState extends State<JobDetailPage>
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text('Materials',
-                  style: Theme.of(context).textTheme.subtitle1),
+                  style: Theme.of(context).textTheme.titleMedium),
               if (widget.isAdmin)
                 IconButton(
                   icon: const Icon(Icons.edit),
@@ -132,7 +132,7 @@ class _JobDetailPageState extends State<JobDetailPage>
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text('Employees',
-                  style: Theme.of(context).textTheme.subtitle1),
+                  style: Theme.of(context).textTheme.titleMedium),
               if (widget.isAdmin)
                 IconButton(
                   icon: const Icon(Icons.edit),
