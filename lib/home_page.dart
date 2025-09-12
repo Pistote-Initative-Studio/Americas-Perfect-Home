@@ -29,9 +29,12 @@ class HomePage extends StatelessWidget {
           Expanded(
             flex: 2,
             child: Container(
-              color: Colors.grey[300],
-              child: const Center(
-                child: Text('Image Area'),
+              color: Colors.white,
+              child: Center(
+                child: Image.asset(
+                  'assets/logo.png',
+                  fit: BoxFit.contain,
+                ),
               ),
             ),
           ),
