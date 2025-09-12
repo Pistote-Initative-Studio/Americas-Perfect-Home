@@ -10,17 +10,20 @@ class HomePage extends StatelessWidget {
         children: [
           Expanded(
             flex: 1,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                _navButton(context, 'Jobs', '/jobs'),
-                _navButton(context, 'Estimates', '/estimates'),
-                _navButton(context, 'Employees', '/employees'),
-                _navButton(context, 'Inbox', '/inbox'),
-                _navButton(context, 'Leads', '/leads'),
-                _navButton(context, 'Calendar', '/calendar'),
-                _navButton(context, 'Vehicles', '/vehicles'),
-              ],
+            child: Container(
+              color: const Color(0xFF2E5265),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _navButton(context, 'Jobs', '/jobs'),
+                  _navButton(context, 'Estimates', '/estimates'),
+                  _navButton(context, 'Employees', '/employees'),
+                  _navButton(context, 'Inbox', '/inbox'),
+                  _navButton(context, 'Leads', '/leads'),
+                  _navButton(context, 'Calendar', '/calendar'),
+                  _navButton(context, 'Vehicles', '/vehicles'),
+                ],
+              ),
             ),
           ),
           Expanded(
