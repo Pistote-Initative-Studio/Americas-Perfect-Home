@@ -12,6 +12,13 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_native_splash: ^2.4.0
 
 flutter:
   uses-material-design: true
+
+flutter_native_splash:
+  image: assets/logo.png
+  color: "#ffffff"   # background color of the splash screen
+  android: true
+  ios: true
