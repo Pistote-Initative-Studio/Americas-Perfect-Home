@@ -103,20 +103,10 @@ class NavigationPage extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 32),
-              Expanded(
+              const Expanded(
                 child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(32),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.04),
-                        blurRadius: 20,
-                        offset: const Offset(0, 10),
-                      ),
-                    ],
-                  ),
-                  child: const Center(
+                  color: Colors.white,
+                  child: Center(
                     child: Text(
                       'Image Area',
                       style: TextStyle(
