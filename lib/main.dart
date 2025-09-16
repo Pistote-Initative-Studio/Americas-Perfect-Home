@@ -102,10 +102,9 @@ class NavigationPage extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(width: 32),
               Expanded(
                 child: Container(
-                  color: Colors.white,
+                  color: const Color(0xFFF3F4F8),
                   child: Center(
                     child: Text(
                       'Image Area',
