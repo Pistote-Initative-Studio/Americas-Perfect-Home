@@ -1,6 +1,15 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
-void main() {
+import 'firebase_options.dart';
+import 'jobs_page.dart';
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
   runApp(const ConstructionManagementApp());
 }
 
@@ -94,7 +103,16 @@ class NavigationPage extends StatelessWidget {
                         ),
                         child: ElevatedButton(
                           style: buttonStyle,
-                          onPressed: () {},
+                          onPressed: () {
+                            final label = buttonLabels[i];
+                            if (label == 'Jobs') {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (_) => const JobsPage(),
+                                ),
+                              );
+                            }
+                          },
                           child: Text(buttonLabels[i]),
                         ),
                       ),
