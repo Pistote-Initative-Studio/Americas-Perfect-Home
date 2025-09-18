@@ -64,7 +64,7 @@ class NavigationPage extends StatelessWidget {
                 padding:
                     const EdgeInsets.symmetric(vertical: 24, horizontal: 12),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: const Color(0xFF2F5061),
                   borderRadius: BorderRadius.circular(28),
                   boxShadow: [
                     BoxShadow(
@@ -83,7 +83,7 @@ class NavigationPage extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFF2E3A59),
+                        color: Colors.white,
                       ),
                     ),
                     const SizedBox(height: 24),
@@ -106,12 +106,11 @@ class NavigationPage extends StatelessWidget {
                 child: Container(
                   color: const Color(0xFFF3F4F8),
                   child: Center(
-                    child: Text(
-                      'Image Area',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFF2E3A59),
+                    child: Padding(
+                      padding: const EdgeInsets.all(24),
+                      child: Image.asset(
+                        'assets/logo.png',
+                        fit: BoxFit.contain,
                       ),
                     ),
                   ),
