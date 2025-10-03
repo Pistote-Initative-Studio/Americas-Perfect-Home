@@ -12,7 +12,7 @@ def flutter_root
   generated_xcode_build_settings_path = File.expand_path(File.join('Flutter', 'Generated.xcconfig'))
 
   unless File.exist?(generated_xcode_build_settings_path)
-    puts " Warning: ios/Flutter/Generated.xcconfig not found. Run `flutter pub get` first."
+    puts "Warning: ios/Flutter/Generated.xcconfig not found. Run `flutter pub get` first."
   end
 
   File.foreach(generated_xcode_build_settings_path) do |line|
@@ -20,7 +20,7 @@ def flutter_root
     return matches[1].strip if matches
   end
 
-  raise "FLUTTER_ROOT not found in #{generated_xcode_build_settings_path}. Try deleting Generated.xcconfig, then run `flutter pub get` again."
+  raise "FLUTTER_ROOT not found in #{generated_xcode_build_settings_path}. Try deleting Generated.xcconfig, then run `flutter pub get`."
 end
 
 require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelper'), flutter_root)
@@ -32,16 +32,21 @@ target 'Runner' do
   use_modular_headers!
 
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
+
+  # Use the local LevelDB podspec
+  pod 'leveldb-library', :podspec => 'CustomPodspecs/leveldb-library.podspec'
 end
 
 post_install do |installer|
   installer.pods_project.targets.each do |target|
     target.build_configurations.each do |config|
-      # Force all pods to iOS 13.0 minimum
+      # Force iOS 13 minimum
       config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '13.0'
+
+      # Inherit headers
       config.build_settings['HEADER_SEARCH_PATHS'] ||= '$(inherited)'
       config.build_settings['HEADER_SEARCH_PATHS'] << '$(SRCROOT)/Flutter'
+      config.build_settings['HEADER_SEARCH_PATHS'] << '$(PODS_ROOT)/Headers/Public'
     end
   end
 end
-
