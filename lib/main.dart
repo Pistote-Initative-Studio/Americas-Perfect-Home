@@ -57,23 +57,29 @@ class AdminNavigationPage extends StatelessWidget {
                     itemCount: navigationItems.length,
                     itemBuilder: (context, index) {
                       final item = navigationItems[index];
-                      return SizedBox(
-                        width: double.infinity,
+                      return Align(
+                        alignment: Alignment.centerLeft,
                         child: ElevatedButton(
                           onPressed: () {},
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.white,
                             foregroundColor: Colors.blueGrey.shade800,
                             elevation: 0,
-                            padding: const EdgeInsets.symmetric(vertical: 18),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(32),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 24,
+                              vertical: 12,
                             ),
+                            minimumSize: Size.zero,
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            shape: const StadiumBorder(),
                           ),
                           child: Text(
                             item,
+                            maxLines: 1,
+                            softWrap: false,
+                            overflow: TextOverflow.ellipsis,
                             style: const TextStyle(
-                              fontSize: 16,
+                              fontSize: 15,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
