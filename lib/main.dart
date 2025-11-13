@@ -50,7 +50,7 @@ class AdminNavigationPage extends StatelessWidget {
             Expanded(
               flex: 4,
               child: Container(
-                color: const Color(0xFFF9F9FB),
+                color: const Color(0xFF344E5C),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 32),
                   child: ListView.separated(
