@@ -47,12 +47,12 @@ class AdminNavigationPage extends StatelessWidget {
       body: SafeArea(
         child: Row(
           children: [
-            Flexible(
-              flex: 3,
+            Expanded(
+              flex: 4,
               child: Container(
                 color: const Color(0xFFF9F9FB),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 32),
                   child: ListView.separated(
                     itemCount: navigationItems.length,
                     itemBuilder: (context, index) {
@@ -68,7 +68,7 @@ class AdminNavigationPage extends StatelessWidget {
                               foregroundColor: Colors.blueGrey.shade800,
                               elevation: 0,
                               padding: const EdgeInsets.symmetric(
-                                horizontal: 24,
+                                horizontal: 16,
                                 vertical: 12,
                               ),
                               minimumSize: const Size(160, 0),
@@ -94,7 +94,7 @@ class AdminNavigationPage extends StatelessWidget {
               ),
             ),
             Expanded(
-              flex: 7,
+              flex: 6,
               child: Container(
                 color: const Color(0xFFE6E7EB),
                 child: const Center(
