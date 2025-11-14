@@ -1,4 +1,5 @@
 import 'package:americas_perfect_home/models/job.dart';
+import 'package:americas_perfect_home/screens/admin/job_tasks_page.dart';
 import 'package:flutter/material.dart';
 
 class JobDetailPage extends StatefulWidget {
@@ -11,7 +12,6 @@ class JobDetailPage extends StatefulWidget {
 }
 
 class _JobDetailPageState extends State<JobDetailPage> {
-  late List<JobTask> _tasks;
   late List<EmployeeAssignment> _activeEmployees;
   late List<EmployeeAssignment> _pastEmployees;
   late List<MaterialItem> _materials;
@@ -19,18 +19,6 @@ class _JobDetailPageState extends State<JobDetailPage> {
   @override
   void initState() {
     super.initState();
-    _tasks = widget.job.tasks
-        .map(
-          (JobTask task) => JobTask(
-            id: task.id,
-            title: task.title,
-            assignedEmployeeId: task.assignedEmployeeId,
-            status: task.status,
-            hasBeforePhoto: task.hasBeforePhoto,
-            hasAfterPhoto: task.hasAfterPhoto,
-          ),
-        )
-        .toList();
     _activeEmployees = widget.job.activeEmployees
         .map(
           (EmployeeAssignment assignment) => EmployeeAssignment(
@@ -72,56 +60,6 @@ class _JobDetailPageState extends State<JobDetailPage> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(message)),
     );
-  }
-
-  void _attachBeforePhoto(JobTask task) {
-    setState(() {
-      task.hasBeforePhoto = true;
-    });
-  }
-
-  void _attachAfterPhoto(JobTask task) {
-    setState(() {
-      task.hasAfterPhoto = true;
-    });
-  }
-
-  void _startTask(JobTask task) {
-    if (!task.hasBeforePhoto) {
-      _showSnackBar('Add a before photo before starting this task.');
-      return;
-    }
-    if (task.status != JobTaskStatus.notStarted) {
-      _showSnackBar('Only tasks that have not started can be moved to In Progress.');
-      return;
-    }
-    setState(() {
-      task.status = JobTaskStatus.inProgress;
-    });
-  }
-
-  void _markTaskInReview(JobTask task) {
-    if (task.status != JobTaskStatus.inProgress) {
-      _showSnackBar('Only tasks In Progress can be marked as done by employees.');
-      return;
-    }
-    if (!task.hasAfterPhoto) {
-      _showSnackBar('Add an after photo before marking this task done.');
-      return;
-    }
-    setState(() {
-      task.status = JobTaskStatus.inReview;
-    });
-  }
-
-  void _approveTask(JobTask task) {
-    if (task.status != JobTaskStatus.inReview) {
-      _showSnackBar('Only tasks in review can be approved by an admin.');
-      return;
-    }
-    setState(() {
-      task.status = JobTaskStatus.complete;
-    });
   }
 
   Future<void> _assignEmployeeDialog() async {
@@ -266,25 +204,7 @@ class _JobDetailPageState extends State<JobDetailPage> {
               ],
             ),
           ),
-          _SectionCard(
-            title: 'Tasks',
-            child: Column(
-              children: _tasks.isEmpty
-                  ? <Widget>[
-                      const Text('No tasks have been added for this job yet.'),
-                    ]
-                  : _tasks
-                      .map((JobTask task) => _TaskTile(
-                            task: task,
-                            onAttachBeforePhoto: () => _attachBeforePhoto(task),
-                            onAttachAfterPhoto: () => _attachAfterPhoto(task),
-                            onStart: () => _startTask(task),
-                            onMarkDone: () => _markTaskInReview(task),
-                            onApprove: () => _approveTask(task),
-                          ))
-                      .toList(),
-            ),
-          ),
+          _buildTasksSummaryCard(job),
           const _SectionCard(
             title: 'Scope / Notes',
             child: Text('TODO: add scope and notes details.'),
@@ -442,6 +362,109 @@ class _JobDetailPageState extends State<JobDetailPage> {
       ),
     );
   }
+
+  Widget _buildTasksSummaryCard(Job job) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 16),
+      clipBehavior: Clip.hardEdge,
+      child: InkWell(
+        onTap: () async {
+          await Navigator.push(
+            context,
+            MaterialPageRoute<void>(
+              builder: (BuildContext context) => JobTasksPage(job: job),
+            ),
+          );
+          setState(() {});
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: const <Widget>[
+                  Text(
+                    'Tasks',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Icon(Icons.chevron_right),
+                ],
+              ),
+              const SizedBox(height: 12),
+              if (job.tasks.isEmpty)
+                const Text('No tasks have been added for this job yet.')
+              else
+                Column(
+                  children: job.tasks
+                      .map(
+                        (JobTask task) => Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 6),
+                          child: Row(
+                            children: <Widget>[
+                              Expanded(
+                                child: Text(
+                                  task.title,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyMedium,
+                                ),
+                              ),
+                              _buildTaskStatusIndicator(task.status),
+                            ],
+                          ),
+                        ),
+                      )
+                      .toList(),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTaskStatusIndicator(JobTaskStatus status) {
+    IconData icon;
+    Color color;
+    switch (status) {
+      case JobTaskStatus.complete:
+        icon = Icons.check_circle;
+        color = Colors.green;
+        break;
+      case JobTaskStatus.inReview:
+        icon = Icons.hourglass_bottom;
+        color = Colors.orange;
+        break;
+      case JobTaskStatus.inProgress:
+        icon = Icons.autorenew;
+        color = Colors.blue;
+        break;
+      case JobTaskStatus.notStarted:
+        icon = Icons.radio_button_unchecked;
+        color = Colors.grey;
+        break;
+    }
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        Icon(icon, color: color, size: 18),
+        const SizedBox(width: 4),
+        Text(
+          status.label,
+          style: TextStyle(
+            color: color,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
+    );
+  }
 }
 
 class _SectionCard extends StatelessWidget {
@@ -472,101 +495,3 @@ class _SectionCard extends StatelessWidget {
   }
 }
 
-class _TaskTile extends StatelessWidget {
-  const _TaskTile({
-    required this.task,
-    required this.onAttachBeforePhoto,
-    required this.onAttachAfterPhoto,
-    required this.onStart,
-    required this.onMarkDone,
-    required this.onApprove,
-  });
-
-  final JobTask task;
-  final VoidCallback onAttachBeforePhoto;
-  final VoidCallback onAttachAfterPhoto;
-  final VoidCallback onStart;
-  final VoidCallback onMarkDone;
-  final VoidCallback onApprove;
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
-                Expanded(
-                  child: Text(
-                    task.title,
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                ),
-                Chip(
-                  label: Text(task.status.label),
-                  backgroundColor: task.status.color.withOpacity(0.1),
-                  labelStyle: TextStyle(
-                    color: task.status.color,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: <Widget>[
-                Icon(
-                  task.hasBeforePhoto ? Icons.check_circle : Icons.camera_alt_outlined,
-                  color: task.hasBeforePhoto ? Colors.green : Colors.grey,
-                  size: 20,
-                ),
-                const SizedBox(width: 6),
-                const Text('Before Photo'),
-                const SizedBox(width: 16),
-                Icon(
-                  task.hasAfterPhoto ? Icons.check_circle : Icons.camera_alt_outlined,
-                  color: task.hasAfterPhoto ? Colors.green : Colors.grey,
-                  size: 20,
-                ),
-                const SizedBox(width: 6),
-                const Text('After Photo'),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Wrap(
-              spacing: 8,
-              runSpacing: 4,
-              children: <Widget>[
-                OutlinedButton(
-                  onPressed: onAttachBeforePhoto,
-                  child: const Text('Attach Before Photo'),
-                ),
-                OutlinedButton(
-                  onPressed: onAttachAfterPhoto,
-                  child: const Text('Attach After Photo'),
-                ),
-                ElevatedButton(
-                  onPressed: onStart,
-                  child: const Text('Start Task'),
-                ),
-                ElevatedButton(
-                  onPressed: onMarkDone,
-                  child: const Text('Mark Done (Employee)'),
-                ),
-                ElevatedButton(
-                  onPressed: onApprove,
-                  child: const Text('Approve (Admin)'),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
