@@ -38,6 +38,86 @@ extension JobStatusX on JobStatus {
   }
 }
 
+/// Represents an employee assignment for a job.
+class EmployeeAssignment {
+  EmployeeAssignment({
+    required this.id,
+    required this.name,
+    required this.hourlyRate,
+    required this.hoursWorked,
+  });
+
+  final String id;
+  final String name;
+  final double hourlyRate;
+  double hoursWorked;
+}
+
+/// Represents a material item included in a job estimate.
+class MaterialItem {
+  MaterialItem({
+    required this.name,
+    required this.quantity,
+    required this.quotedCost,
+    required this.actualCost,
+  });
+
+  final String name;
+  final int quantity;
+  final double quotedCost;
+  double actualCost;
+}
+
+/// Statuses for individual job tasks.
+enum JobTaskStatus { notStarted, inProgress, inReview, complete }
+
+extension JobTaskStatusX on JobTaskStatus {
+  String get label {
+    switch (this) {
+      case JobTaskStatus.notStarted:
+        return 'Not Started';
+      case JobTaskStatus.inProgress:
+        return 'In Progress';
+      case JobTaskStatus.inReview:
+        return 'In Review';
+      case JobTaskStatus.complete:
+        return 'Complete';
+    }
+  }
+
+  Color get color {
+    switch (this) {
+      case JobTaskStatus.notStarted:
+        return Colors.grey;
+      case JobTaskStatus.inProgress:
+        return Colors.orange;
+      case JobTaskStatus.inReview:
+        return Colors.blue;
+      case JobTaskStatus.complete:
+        return Colors.green;
+    }
+  }
+}
+
+/// Represents a job task with simple workflow requirements.
+class JobTask {
+  JobTask({
+    required this.id,
+    required this.title,
+    this.assignedEmployeeId,
+    this.status = JobTaskStatus.notStarted,
+    this.hasBeforePhoto = false,
+    this.hasAfterPhoto = false,
+  });
+
+  final String id;
+  final String title;
+  final String? assignedEmployeeId;
+  JobTaskStatus status;
+  bool hasBeforePhoto;
+  bool hasAfterPhoto;
+}
+
 /// Basic data structure representing a job in the admin flow.
 class Job {
   const Job({
@@ -51,6 +131,10 @@ class Job {
     required this.totalHours,
     required this.hourlyRate,
     required this.notes,
+    this.activeEmployees = const <EmployeeAssignment>[],
+    this.pastEmployees = const <EmployeeAssignment>[],
+    this.materials = const <MaterialItem>[],
+    this.tasks = const <JobTask>[],
   });
 
   final String id;
@@ -63,4 +147,8 @@ class Job {
   final double totalHours;
   final double hourlyRate;
   final String notes;
+  final List<EmployeeAssignment> activeEmployees;
+  final List<EmployeeAssignment> pastEmployees;
+  final List<MaterialItem> materials;
+  final List<JobTask> tasks;
 }
