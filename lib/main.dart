@@ -2,7 +2,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
 import 'firebase_options.dart'; // after FlutterFire CLI setup
-import 'screens/admin/admin_home_page.dart';
 import 'screens/admin/calendar_page.dart';
 import 'screens/admin/employees_page.dart';
 import 'screens/admin/estimates_page.dart';
