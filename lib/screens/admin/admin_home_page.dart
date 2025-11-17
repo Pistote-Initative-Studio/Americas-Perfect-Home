@@ -1,10 +1,18 @@
 import 'package:flutter/material.dart';
 
-import 'settings/user_management_page.dart';
+import '../../models/app_user.dart';
+import '../settings/settings_page.dart';
 
-class AdminHomePage extends StatelessWidget {
-  const AdminHomePage({super.key});
+class AdminHomePage extends StatefulWidget {
+  final AppUser appUser;
 
+  const AdminHomePage({super.key, required this.appUser});
+
+  @override
+  State<AdminHomePage> createState() => _AdminHomePageState();
+}
+
+class _AdminHomePageState extends State<AdminHomePage> {
   @override
   Widget build(BuildContext context) {
     final navigationItems = const <String>[
@@ -40,21 +48,6 @@ class AdminHomePage extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 32),
                   child: Column(
                     children: [
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: IconButton(
-                          tooltip: 'User Management',
-                          icon: const Icon(Icons.settings, color: Colors.white),
-                          onPressed: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (_) => const UserManagementPage(),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                      const SizedBox(height: 8),
                       Expanded(
                         child: ListView.separated(
                           itemCount: navigationItems.length,
@@ -97,6 +90,44 @@ class AdminHomePage extends StatelessWidget {
                             );
                           },
                           separatorBuilder: (context, index) => const SizedBox(height: 16),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => SettingsPage(appUser: widget.appUser),
+                                ),
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white,
+                              foregroundColor: Colors.blueGrey.shade800,
+                              elevation: 0,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 12,
+                              ),
+                              minimumSize: const Size(160, 0),
+                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              shape: const StadiumBorder(),
+                              textStyle: const TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            child: const Text(
+                              'Settings',
+                              maxLines: 1,
+                              softWrap: false,
+                            ),
+                          ),
                         ),
                       ),
                     ],
