@@ -15,25 +15,28 @@ class AdminHomePage extends StatefulWidget {
 class _AdminHomePageState extends State<AdminHomePage> {
   @override
   Widget build(BuildContext context) {
-    final navigationItems = const <String>[
-      'Jobs',
-      'Estimates',
-      'Employees',
-      'Inbox',
-      'Leads',
-      'Calendar',
-      'Vehicles',
+    final role = widget.appUser.role;
+
+    const navigationItems = <_NavItem>[
+      _NavItem(label: 'Jobs', route: '/admin/jobs'),
+      _NavItem(label: 'Estimates', route: '/admin/estimates'),
+      _NavItem(label: 'Employees', route: '/admin/employees'),
+      _NavItem(label: 'Inbox', route: '/admin/inbox'),
+      _NavItem(label: 'Leads', route: '/admin/leads'),
+      _NavItem(label: 'Calendar', route: '/admin/calendar'),
+      _NavItem(label: 'Vehicles', route: '/admin/vehicles'),
     ];
 
-    final routeByItem = <String, String>{
-      'Jobs': '/admin/jobs',
-      'Estimates': '/admin/estimates',
-      'Employees': '/admin/employees',
-      'Inbox': '/admin/inbox',
-      'Leads': '/admin/leads',
-      'Calendar': '/admin/calendar',
-      'Vehicles': '/admin/vehicles',
-    };
+    final filteredNavigationItems = role == UserRole.customer
+        ? navigationItems
+            .where(
+              (item) =>
+                  item.label != 'Employees' &&
+                  item.label != 'Leads' &&
+                  item.label != 'Vehicles',
+            )
+            .toList()
+        : navigationItems;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF2F2F2),
@@ -50,19 +53,16 @@ class _AdminHomePageState extends State<AdminHomePage> {
                     children: [
                       Expanded(
                         child: ListView.separated(
-                          itemCount: navigationItems.length,
+                          itemCount: filteredNavigationItems.length,
                           itemBuilder: (context, index) {
-                            final item = navigationItems[index];
+                            final item = filteredNavigationItems[index];
                             return Align(
                               alignment: Alignment.centerLeft,
                               child: SizedBox(
                                 width: double.infinity,
                                 child: ElevatedButton(
                                   onPressed: () {
-                                    final route = routeByItem[item];
-                                    if (route != null) {
-                                      Navigator.pushNamed(context, route);
-                                    }
+                                    Navigator.pushNamed(context, item.route);
                                   },
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: Colors.white,
@@ -81,7 +81,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
                                     ),
                                   ),
                                   child: Text(
-                                    item,
+                                    item.label,
                                     maxLines: 1,
                                     softWrap: false,
                                   ),
@@ -156,4 +156,11 @@ class _AdminHomePageState extends State<AdminHomePage> {
       ),
     );
   }
+}
+
+class _NavItem {
+  final String label;
+  final String route;
+
+  const _NavItem({required this.label, required this.route});
 }
