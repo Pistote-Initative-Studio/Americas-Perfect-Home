@@ -4,8 +4,6 @@ import 'package:flutter/material.dart';
 
 import '../../models/app_user.dart';
 import '../admin/admin_home_page.dart';
-import '../customer/customer_home_page.dart';
-import '../employee/employee_home_page.dart';
 import 'login_page.dart';
 
 class AuthGate extends StatelessWidget {
@@ -47,14 +45,7 @@ class AuthGate extends StatelessWidget {
             final appUser =
                 AppUser.fromMap(user.uid, userSnapshot.data!.data()!);
 
-            switch (appUser.role) {
-              case UserRole.admin:
-                return const AdminHomePage();
-              case UserRole.employee:
-                return EmployeeHomePage(appUser: appUser);
-              case UserRole.customer:
-                return CustomerHomePage(appUser: appUser);
-            }
+            return AdminHomePage(appUser: appUser);
           },
         );
       },
