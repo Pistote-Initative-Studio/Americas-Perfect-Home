@@ -143,55 +143,53 @@ class _EstimatesPageState extends State<EstimatesPage> {
                             elevation: 1,
                             child: Padding(
                               padding: const EdgeInsets.all(16),
-                              child: Row(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: <Widget>[
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: <Widget>[
-                                        Text(
-                                          estimate.title,
-                                          style: const TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.w700,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 6),
-                                        Text(
-                                          estimate.customerName,
-                                          style: TextStyle(
-                                            color: Colors.grey.shade800,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 12),
-                                        Row(
-                                          children: <Widget>[
-                                            _buildStatusChip(estimate.status),
-                                            const SizedBox(width: 12),
-                                            Text(
-                                              _formatDate(estimate.createdAt),
-                                              style: TextStyle(color: Colors.grey.shade700),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
+                                  Text(
+                                    estimate.title,
+                                    style: const TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w700,
                                     ),
                                   ),
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    estimate.customerName,
+                                    style: TextStyle(
+                                      color: Colors.grey.shade800,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 12),
+                                  Row(
                                     children: <Widget>[
-                                      const Text(
-                                        'Total',
-                                        style: TextStyle(fontWeight: FontWeight.w600),
-                                      ),
                                       Text(
-                                        '\$${estimate.total.toStringAsFixed(2)}',
-                                        style: const TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
-                                        ),
+                                        _formatDate(estimate.createdAt),
+                                        style: TextStyle(color: Colors.grey.shade700),
+                                      ),
+                                      const Spacer(),
+                                      Column(
+                                        crossAxisAlignment: CrossAxisAlignment.end,
+                                        children: <Widget>[
+                                          const Text(
+                                            'Total',
+                                            style: TextStyle(fontWeight: FontWeight.w600),
+                                          ),
+                                          Text(
+                                            '\$${estimate.total.toStringAsFixed(2)}',
+                                            style: const TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ],
+                                  ),
+                                  const SizedBox(height: 12),
+                                  Align(
+                                    alignment: Alignment.centerRight,
+                                    child: _buildStatusChip(estimate.status),
                                   ),
                                 ],
                               ),
