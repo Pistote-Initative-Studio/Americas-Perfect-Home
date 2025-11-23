@@ -4,12 +4,13 @@ import 'package:flutter/material.dart';
 import 'firebase_options.dart'; // after FlutterFire CLI setup
 import 'screens/admin/calendar_page.dart';
 import 'screens/admin/employees_page.dart';
-import 'screens/admin/estimates_page.dart';
 import 'screens/admin/inbox_page.dart';
 import 'screens/admin/jobs_page.dart';
 import 'screens/admin/leads_page.dart';
 import 'screens/admin/vehicles_page.dart';
 import 'screens/auth/auth_gate.dart';
+import 'screens/estimates/estimates_page.dart';
+import 'models/app_user.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -34,7 +35,18 @@ class MyApp extends StatelessWidget {
       home: const AuthGate(),
       routes: {
         '/admin/jobs': (context) => const JobsPage(),
-        '/admin/estimates': (context) => const EstimatesPage(),
+        '/admin/estimates': (context) {
+          final Object? args = ModalRoute.of(context)?.settings.arguments;
+          if (args is AppUser) {
+            return EstimatesPage(appUser: args);
+          }
+
+          return const Scaffold(
+            body: Center(
+              child: Text('Missing user context for Estimates'),
+            ),
+          );
+        },
         '/admin/employees': (context) => const EmployeesPage(),
         '/admin/inbox': (context) => const InboxPage(),
         '/admin/leads': (context) => const LeadsPage(),
