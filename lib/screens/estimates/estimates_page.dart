@@ -91,7 +91,7 @@ class _EstimatesPageState extends State<EstimatesPage> {
                 Navigator.push(
                   context,
                   MaterialPageRoute<void>(
-                    builder: (_) => const Scaffold(
+                    builder: (_) => Scaffold(
                       appBar: AppBar(title: Text('Create Estimate')),
                       body: Center(child: Text('TODO: Estimate creation form')),
                     ),
