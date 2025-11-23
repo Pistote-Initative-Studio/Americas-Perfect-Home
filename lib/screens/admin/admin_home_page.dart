@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../models/app_user.dart';
+import '../estimates/estimates_page.dart';
 import '../settings/settings_page.dart';
 
 class AdminHomePage extends StatefulWidget {
@@ -18,7 +19,12 @@ class _AdminHomePageState extends State<AdminHomePage> {
   }
 
   void _openEstimates(BuildContext context) {
-    Navigator.pushNamed(context, '/admin/estimates');
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => EstimatesPage(appUser: widget.appUser),
+      ),
+    );
   }
 
   void _openEmployees(BuildContext context) {
